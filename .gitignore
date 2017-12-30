@@ -1,0 +1,6 @@
+
+*.code-workspace
+.vscode/c_cpp_properties.json
+*.json
+.vscode/arduino.json
+.vscode/arduino.json
