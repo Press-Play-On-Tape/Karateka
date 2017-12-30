@@ -62,7 +62,7 @@ void playerMovements() {
 
             player.activity++;
 
-            if (player.activity > 5) {
+            if (player.activity > 4) {
               playerStack.push(STANCE_DEFAULT, STANCE_DEFAULT_LEAN_FORWARD);
               player.activity = 0;
             }
