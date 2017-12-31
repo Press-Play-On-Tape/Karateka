@@ -16,7 +16,7 @@ void playerMovements() {
 
   if (playerStack.isEmpty()) {
   
-    mainSceneDelta = 0;
+    player.xPosDelta = 0;
 
     if ((currPressed & A_BUTTON_MASK)) {
 
@@ -213,27 +213,27 @@ void playerMovements() {
               
               if (distBetween > DISTANCE_BETWEEN_LRG || !gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
 
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA; 
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_2_DELTA; 
                 playerStack.push(STANCE_DEFAULT, STANCE_DEFAULT_LEAN_BACK, STANCE_SIDLING_3);
                 playerStack.push(STANCE_SIDLING_2, STANCE_SIDLING_1, STANCE_DEFAULT_LEAN_FORWARD);
   
               }
               else if (distBetween > DISTANCE_BETWEEN_MED) { 
                 
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
                 playerStack.push(STANCE_DEFAULT, STANCE_DEFAULT_LEAN_BACK, STANCE_SIDLING_3);
                 playerStack.push(STANCE_SIDLING_2, STANCE_SIDLING_1, STANCE_DEFAULT_LEAN_FORWARD);
                 
               }
               else if (distBetween > DISTANCE_BETWEEN_SML) { 
                 
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
                 playerStack.push(STANCE_DEFAULT, STANCE_SIDLING_2, STANCE_SIDLING_1);
                 
               }
               else if (distBetween > DISTANCE_BETWEEN_TINY) { 
 
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_1_DELTA; 
                 playerStack.push(STANCE_DEFAULT, STANCE_SIDLING_1);
                 
               }
@@ -242,7 +242,7 @@ void playerMovements() {
 
             else if (currPressed & LEFT_BUTTON_MASK && player.xPosOverall > 12)  { // Sidle backward ..
               
-              mainSceneDelta = MAIN_SCENE_X_SIDLING_1_DELTA; 
+              player.xPosDelta = MAIN_SCENE_X_SIDLING_1_DELTA; 
               playerStack.push(STANCE_DEFAULT, STANCE_SIDLING_7, STANCE_DEFAULT_LEAN_FORWARD);
               playerStack.push(STANCE_SIDLING_6, STANCE_SIDLING_5, STANCE_SIDLING_4);
               
@@ -258,7 +258,7 @@ void playerMovements() {
             
             else if (currPressed & RIGHT_BUTTON_MASK && distBetween > 100)  { // Start running ..
               player.rightFoot = true;
-              mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
+              player.xPosDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
               playerStack.push(STANCE_RUNNING_6, STANCE_RUNNING_8, STANCE_RUNNING_5);
 //              playerStack.push(STANCE_RUNNING_4, STANCE_RUNNING_3, STANCE_RUNNING_2);
               playerStack.push(STANCE_RUNNING_1);
@@ -271,12 +271,12 @@ void playerMovements() {
             if (currPressed & RIGHT_BUTTON_MASK && distBetween > 100)  { // Continue running ..
 
               if (!player.rightFoot) {
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
                 playerStack.push(STANCE_RUNNING_LF_END, STANCE_RUNNING_2, STANCE_RUNNING_7);
                 playerStack.push(STANCE_RUNNING_4);
               }
               else {
-                mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
+                player.xPosDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
                 playerStack.push(STANCE_RUNNING_RF_END, STANCE_RUNNING_8, STANCE_RUNNING_5);
                 playerStack.push(STANCE_RUNNING_4);
               }
@@ -285,7 +285,7 @@ void playerMovements() {
 
             }
             else {
-              mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
+              player.xPosDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
               playerStack.push(STANCE_STANDING_UPRIGHT, STANCE_RUNNING_STRAIGHTEN_UP);
             }
             break;

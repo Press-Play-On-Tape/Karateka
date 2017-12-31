@@ -15,7 +15,7 @@ void enemy_approach_init() {
     
   }
 
-  mainSceneDelta = MAIN_SCENE_X_SIDLING_2_DELTA;
+  player.xPosDelta = MAIN_SCENE_X_SIDLING_2_DELTA;
   gameStateDetails.setCurrState(GAME_STATE_ENEMY_APPROACH);
 
   enemy.xPos = 48;

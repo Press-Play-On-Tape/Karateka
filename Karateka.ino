@@ -20,7 +20,7 @@ StackArray <uint8_t> playerStack;
 StackArray <uint8_t> enemyStack;
 
 int8_t mainSceneX = 0;
-int8_t mainSceneDelta = 0;
+//int8_t mainSceneDelta = 0;
 bool displayHealth = false;
 bool outdoors = true;
 
@@ -304,41 +304,89 @@ void play_loop() {
 
   }
 
-  
-  //  Update player and enemy positions and stances ..
 
-  // if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-    
-  //   if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
 
-  //   if (!playerStack.isEmpty()) {
-    
-  //     player.stance = playerStack.pop();
-    
-  //   }
-  //   else {
-      
-  //     mainSceneDelta = 0;
+  // Has the player or enemy been hit ?
+ 
+  uint8_t player_BamX = 0;
+  uint8_t player_BamY = 0;
 
-  //   }
+  uint8_t enemy_BamX = 0;
+  uint8_t enemy_BamY = 0;
+
+  #ifdef USE_DIFFERENT_BAMS
+  const int8_t player_BamXPos[] = {  32,  31,  33,            33,  33,  34,  34,  29,  29 };
+  const int8_t enemy_BamXPos[] =  { -17, -17, -19,           -19, -19, -18, -18, -18, -18 };
+  const int8_t both_BamYPos[] =   { -30, -17, -42,           -37, -37, -41, -41, -27, -27 };
+  #endif
+  //                           Kick   M,   L,   H     Punch   MR,  ML,  HR,  HL,  LR,  LL     
+  #ifndef USE_DIFFERENT_BAMS
+  const int8_t player_BamXPos[] = {  27,  25,  30,            30,  30,  30,  30,  23,  23 };
+  const int8_t enemy_BamXPos[] =  { -20, -23, -19,           -22, -22, -18, -18, -24, -24 };
+  const int8_t both_BamYPos[] =   { -33, -21, -42,           -39, -39, -45, -45, -31, -31 };
+  #endif
+
+  if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
+    
+    enemyHit = 0;
+    playerHit = 0;
+
+    if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
+
+
+    // Update the player and enemy stances from the stack ..
+
+    if (!playerStack.isEmpty()) {
+      player.stance = playerStack.pop();
+    }
+    else {
+      player.xPosDelta = 0;
+    }
         
-  //   if (!enemyStack.isEmpty()) {
+    if (!enemyStack.isEmpty()) {
+      enemy.stance = enemyStack.pop();
+    }
+    else {
+      enemy.xPosDelta = 0;
+    }
 
-  //     enemy.stance = enemyStack.pop();
 
-  //   }
-  //   else {
+    // If we are fighting, check to see if a strike has been made ..
 
-  //     enemy.xPosDelta = 0;
+    if (gameStateDetails.enemyType != ENEMY_TYPE_NONE) {
 
-  //   }
+      enemyImmediateAction = false;
+
+      if (player.stance >= STANCE_KICK_MED_END && player.stance <= STANCE_PUNCH_LOW_LH_END) {
+
+        enemyHit = inStrikingRange(getActionFromStance(player.stance), player.xPos, gameStateDetails.enemyType, enemy.stance, enemy.xPos);
+
+      }
+
+      if (enemy.stance >= STANCE_KICK_MED_END && enemy.stance <= STANCE_PUNCH_LOW_LH_END) {
     
-  // }
+        playerHit = inStrikingRange(getActionFromStance(enemy.stance), enemy.xPos, ENEMY_TYPE_PERSON, player.stance, player.xPos);
 
-  
-  // Move scenery if needed ..
+      }
+      if (playerHit > 0 || enemyHit > 0) {
 
-  if (mainSceneDelta != 0) {
+
+        #ifdef SOUNDS
+        if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
+          sound.tones(ouch);
+        }
+        #endif 
+
+      }
+
+    }
+
+  }
+
+
+  // Render the background, acrhes and the players ..
+
+  if (player.xPosDelta != 0) {
 
     int16_t archXPos = gameStateDetails.archXPos;
 
@@ -349,10 +397,10 @@ void play_loop() {
         (gameStateDetails.intArch == ARCH_LEFT_HAND && archXPos < 30)
     ) {
 
-      mainSceneX = mainSceneX + mainSceneDelta;
-      player.xPosOverall = player.xPosOverall - mainSceneDelta;
-      enemy.xPos = enemy.xPos + mainSceneDelta;
-      gameStateDetails.archXPos = archXPos + mainSceneDelta;
+      mainSceneX = mainSceneX + player.xPosDelta;
+      player.xPosOverall = player.xPosOverall - player.xPosDelta;
+      enemy.xPos = enemy.xPos + player.xPosDelta;
+      gameStateDetails.archXPos = archXPos + player.xPosDelta;
 
       if (mainSceneX < -MAIN_SCENE_IMG_WIDTH) { mainSceneX = 0; }
       if (mainSceneX > 0) { mainSceneX = mainSceneX - MAIN_SCENE_IMG_WIDTH; }
@@ -360,13 +408,12 @@ void play_loop() {
     }
     else {
 
-      player.xPos = player.xPos - mainSceneDelta;
-      player.xPosOverall = player.xPosOverall - mainSceneDelta;
+      player.xPos = player.xPos - player.xPosDelta;
+      player.xPosOverall = player.xPosOverall - player.xPosDelta;
 
     }
 
   }
-
 
   if (gameStateDetails.extArch == ARCH_RIGHT_HAND) {
     arduboy.drawCompressedMirror(gameStateDetails.archXPos, -2, arch_exterior_lh_mask, BLACK, false);
@@ -404,89 +451,8 @@ void play_loop() {
   }
 
 
-  // Has the player or enemy been hit ?
 
-  uint8_t player_BamX = 0;
-  uint8_t player_BamY = 0;
-
-  uint8_t enemy_BamX = 0;
-  uint8_t enemy_BamY = 0;
-
-  #ifdef USE_DIFFERENT_BAMS
-  const int8_t player_BamXPos[] = {  32,  31,  33,            33,  33,  34,  34,  29,  29 };
-  const int8_t enemy_BamXPos[] =  { -17, -17, -19,           -19, -19, -18, -18, -18, -18 };
-  const int8_t both_BamYPos[] =   { -30, -17, -42,           -37, -37, -41, -41, -27, -27 };
-  #endif
-  //                           Kick   M,   L,   H     Punch   MR,  ML,  HR,  HL,  LR,  LL     
-  #ifndef USE_DIFFERENT_BAMS
-  const int8_t player_BamXPos[] = {  27,  25,  30,            30,  30,  30,  30,  23,  23 };
-  const int8_t enemy_BamXPos[] =  { -20, -23, -19,           -22, -22, -18, -18, -24, -24 };
-  const int8_t both_BamYPos[] =   { -33, -21, -42,           -39, -39, -45, -45, -31, -31 };
-  #endif
-
-  if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-    
-    enemyHit = 0;
-    playerHit = 0;
-
-    if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
-
-    if (!playerStack.isEmpty()) {
-    
-      player.stance = playerStack.pop();
-    
-    }
-    else {
-      
-      mainSceneDelta = 0;
-
-    }
-        
-    if (!enemyStack.isEmpty()) {
-
-      enemy.stance = enemyStack.pop();
-
-    }
-    else {
-
-      enemy.xPosDelta = 0;
-
-    }
-
-
-
-
-    if (gameStateDetails.enemyType != ENEMY_TYPE_NONE) {
-
-      enemyImmediateAction = false;
-
-    
-
-      if (player.stance >= STANCE_KICK_MED_END && player.stance <= STANCE_PUNCH_LOW_LH_END) {
-
-        enemyHit = inStrikingRange(getActionFromStance(player.stance), player.xPos, gameStateDetails.enemyType, enemy.stance, enemy.xPos);
-
-      }
-
-      if (enemy.stance >= STANCE_KICK_MED_END && enemy.stance <= STANCE_PUNCH_LOW_LH_END) {
-    
-        playerHit = inStrikingRange(getActionFromStance(enemy.stance), enemy.xPos, ENEMY_TYPE_PERSON, player.stance, player.xPos);
-
-      }
-      if (playerHit > 0 || enemyHit > 0) {
-
-
-        #ifdef SOUNDS
-        if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-          sound.tones(ouch);
-        }
-        #endif 
-
-      }
-    }
-
-  }
-
+  //  If the player or enemy has previously been hit, then update their health and render ..
 
   if (playerHit > 0 || enemyHit > 0) {
 
@@ -539,8 +505,8 @@ void play_loop() {
 
         if (enemyStack.isEmpty()) {
 
-            enemyImmediateAction = (random(0, 2) == 0);
-            enemyImmediateRetreat = (random(0, 3) == 0);
+            enemyImmediateAction = (random(0, 2) == 0);     // Should the enemy take an immediate action?
+            enemyImmediateRetreat = (random(0, 3) == 0);    // Should the enemy retreat immediately?
           
         }
       
@@ -588,8 +554,6 @@ void play_loop() {
   }
 
 
-
-
   // Has the player died ?
 
   if (!player.dead && player.health == 0) {
@@ -610,7 +574,7 @@ void play_loop() {
       
     }
 
-    mainSceneDelta = 0;
+    player.xPosDelta = 0;
     
   }
 
@@ -629,7 +593,7 @@ void play_loop() {
       playerStack.insert(STANCE_STANDING_UPRIGHT);
     }
 
-    mainSceneDelta = 0;
+    player.xPosDelta = 0;
     enemy.xPosDelta = 0;
     
   }

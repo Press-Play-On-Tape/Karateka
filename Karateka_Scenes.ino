@@ -87,7 +87,7 @@ void showScene() {
             enemy.stance = enemyStack.pop();
           }
           else {
-            mainSceneDelta = 0;
+            player.xPosDelta = 0;
             gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
           }
           
@@ -96,9 +96,9 @@ void showScene() {
         
         // Move scenery if needed ..
     
-        if (mainSceneDelta != 0) {
+        if (player.xPosDelta != 0) {
     
-          mainSceneX = mainSceneX + mainSceneDelta;
+          mainSceneX = mainSceneX + player.xPosDelta;
     
           if (mainSceneX < -MAIN_SCENE_IMG_WIDTH) { mainSceneX = 0; }
           if (mainSceneX > 0) { mainSceneX = mainSceneX - MAIN_SCENE_IMG_WIDTH; }
@@ -170,7 +170,7 @@ void finalScene() {
 
           }
           
-          mainSceneDelta = 5;
+          player.xPosDelta = 5;
           player.xPos = -48;
           
           enemyStack.push(STANCE_PRINCESS_STANDING);
@@ -188,7 +188,7 @@ void finalScene() {
           break;
 
         case FINAL_SCENE_PAUSE_2:
-          mainSceneDelta = 0;
+          player.xPosDelta = 0;
           enemy.xPosDelta = 0;
           for (int i = 0; i < 4; i++) {
             playerStack.push(STANCE_STANDING_UPRIGHT);
@@ -225,7 +225,7 @@ void finalScene() {
            
       if (!playerStack.isEmpty()) {
         player.stance = playerStack.pop();
-        player.xPos = player.xPos + mainSceneDelta;
+        player.xPos = player.xPos + player.xPosDelta;
         }
 
     }
