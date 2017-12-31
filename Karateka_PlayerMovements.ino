@@ -260,7 +260,7 @@ void playerMovements() {
               player.rightFoot = true;
               mainSceneDelta = -MAIN_SCENE_X_SIDLING_2_DELTA;            
               playerStack.push(STANCE_RUNNING_6, STANCE_RUNNING_8, STANCE_RUNNING_5);
-              playerStack.push(STANCE_RUNNING_4, STANCE_RUNNING_3, STANCE_RUNNING_2);
+//              playerStack.push(STANCE_RUNNING_4, STANCE_RUNNING_3, STANCE_RUNNING_2);
               playerStack.push(STANCE_RUNNING_1);
             }
             break;

@@ -7,7 +7,10 @@
 #define _DEBUG_HIDE_BAM
 #define _DEBUG_STRIKING_RANGE
 
-#define JORDAN_MECHNER
+#define _JORDAN_MECHNER
+#define SOUNDS
+#define _USE_DIFFERENT_BAMS
+#define USE_ENHANCED_BAM3
 
 #define GAME_STATE_TITLE_SCENE                    0
 #define GAME_STATE_JM_SCENE                       1

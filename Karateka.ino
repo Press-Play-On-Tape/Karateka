@@ -5,7 +5,16 @@
 #include "src/images/images.h"
 #include "Enums.h"
 
+#ifdef SOUNDS
+#include <ArduboyTones.h>
+#include "src/sounds/Sounds.h"
+#endif
+
 Arduboy2Ext arduboy;
+
+#ifdef SOUNDS
+ArduboyTones sound(arduboy.audio.on);
+#endif
 
 StackArray <uint8_t> playerStack;
 StackArray <uint8_t> enemyStack;
@@ -21,8 +30,10 @@ bool eagleWingUp = false;
 uint8_t emperorMode = EMPEROR_MODE_INIT;
 uint8_t finalSceneMode = 0;
 
+#ifdef USE_DIFFERENT_BAMS
 const uint8_t *bam_images[] =               { bam1, bam2, bam3 };
 const uint8_t *bam_masks[] =                { bam1_mask, bam2_mask, bam3_mask };
+#endif
 
 bool outside = true;
 GameStateDetails gameStateDetails;
@@ -51,11 +62,10 @@ void setup() {
 
   arduboy.boot();
   arduboy.safeMode(); 
-  arduboy.audio.begin();
   arduboy.setFrameRate(20);
 
   gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
-  
+
 }
 
 
@@ -400,124 +410,187 @@ void play_loop() {
   uint8_t enemyHit = 0;
   uint8_t playerHit = 0;
 
+
+  // if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
+    
+  //   if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
+
+  //   if (!playerStack.isEmpty()) {
+    
+  //     player.stance = playerStack.pop();
+    
+  //   }
+  //   else {
+      
+  //     mainSceneDelta = 0;
+
+  //   }
+        
+  //   if (!enemyStack.isEmpty()) {
+
+  //     enemy.stance = enemyStack.pop();
+
+  //   }
+  //   else {
+
+  //     enemy.xPosDelta = 0;
+
+  //   }
+
+
+
+
   if (gameStateDetails.enemyType != ENEMY_TYPE_NONE) {
 
-    const int8_t player_BamXPos[] = { 32, 31, 33, 33, 33, 34, 34, 29, 29 };
-    const int8_t player_BamYPos[] = { -30, -17, -42, -37, -37, -41, -41, -27, -27 };
-    const int8_t enemy_BamXPos[] = { -17, -17, -19, -19, -19, -18, -18, -18, -18 };
-    const int8_t enemy_BamYPos[] = { -30, -17, -40, -37, -37, -40, -40, -28, -28 };
-
+    #ifdef USE_DIFFERENT_BAMS
+    const int8_t player_BamXPos[] = {  32,  31,  33,            33,  33,  34,  34,  29,  29 };
+    const int8_t enemy_BamXPos[] =  { -17, -17, -19,           -19, -19, -18, -18, -18, -18 };
+    const int8_t both_BamYPos[] =   { -30, -17, -42,           -37, -37, -41, -41, -27, -27 };
+    #endif
+    //                           Kick   M,   L,   H     Punch   MR,  ML,  HR,  HL,  LR,  LL     
+    #ifndef USE_DIFFERENT_BAMS
+    const int8_t player_BamXPos[] = {  27,  25,  30,            30,  30,  30,  30,  23,  23 };
+    const int8_t enemy_BamXPos[] =  { -20, -23, -19,           -22, -22, -18, -18, -24, -24 };
+    const int8_t both_BamYPos[] =   { -33, -21, -42,           -39, -39, -45, -45, -31, -31 };
+    #endif
     
-    //const unit8_t 
+    enemyImmediateAction = false;
 
     {
-      uint8_t player_BamX = 0;
-      uint8_t player_BamY = 0;
-
-      uint8_t enemy_BamX = 0;
-      uint8_t enemy_BamY = 0;
 
       if (player.stance >= STANCE_KICK_MED_END && player.stance <= STANCE_PUNCH_LOW_LH_END) {
 
         enemyHit = inStrikingRange(getActionFromStance(player.stance), player.xPos, gameStateDetails.enemyType, enemy.stance, enemy.xPos);
-        if (enemyHit > 0) { enemy_BamX = player.xPos + player_BamXPos[player.stance - STANCE_KICK_MED_END] ; enemy_BamY = player.yPos + player_BamYPos[player.stance - STANCE_KICK_MED_END]; }
 
       }
 
       if (enemy.stance >= STANCE_KICK_MED_END && enemy.stance <= STANCE_PUNCH_LOW_LH_END) {
     
         playerHit = inStrikingRange(getActionFromStance(enemy.stance), enemy.xPos, ENEMY_TYPE_PERSON, player.stance, player.xPos);
-        if (playerHit > 0) { 
+
+      }
+
+      if (playerHit > 0 || enemyHit > 0) {
+
+        uint8_t player_BamX = 0;
+        uint8_t player_BamY = 0;
+
+        uint8_t enemy_BamX = 0;
+        uint8_t enemy_BamY = 0;
+
+        #ifdef SOUNDS
+          sound.tones(ouch);
+        #endif 
+
+        if (playerHit > 0) {
+
+          uint8_t index = (playerHit > 3 ? 2 : playerHit - 1);
+
           player_BamX = (enemy.xPos + enemy_BamXPos[enemy.stance - STANCE_KICK_MED_END]); 
           if (player_BamX > 128) { player_BamX = 0; }
-          player_BamY = enemy.yPos + enemy_BamYPos[enemy.stance - STANCE_KICK_MED_END]; 
-        }
+          player_BamY = enemy.yPos + both_BamYPos[enemy.stance - STANCE_KICK_MED_END]; 
 
-      }
+          #ifndef DEBUG_HIDE_BAM
 
-      
-      if (playerHit > 0) {
+            #ifdef USE_DIFFERENT_BAMS
+            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_masks[index], BLACK, false);
+            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_images[index], WHITE, false);
+            #endif
 
-        uint8_t index = (playerHit > 3 ? 2 : playerHit - 1);
+            #ifndef USE_DIFFERENT_BAMS
+            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3_mask, BLACK, false);
+            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3, WHITE, false);
+            #endif
 
-        #ifndef DEBUG_HIDE_BAM
-          arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_masks[index], BLACK, false);
-          arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_images[index], WHITE, false);
-        #endif
+          #endif
 
-      }
-
-      
-      if (enemyHit > 0) {
-
-        uint8_t index = (enemyHit > 3 ? 2 : enemyHit - 1);
-
-        #ifndef DEBUG_HIDE_BAM
-          arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_masks[index], BLACK, false);
-          arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_images[index], WHITE, false);
-        #endif
-
-      }
-      
-      if (playerHit > 0) {
-
-        player.health = (player.health - playerHit < 10 ? 0 : player.health - playerHit);
-        player.regain = 0;
-
-      }
-      else {
-
-        player.regain++;
-
-        if (player.regain >= HEALTH_REGAIN_LIMIT) {
-
-          player.health = (player.health + HEALTH_REGAIN_POINTS < player.regainLimit ? player.health + HEALTH_REGAIN_POINTS : player.regainLimit);
+          player.health = (player.health - playerHit < 10 ? 0 : player.health - playerHit);
           player.regain = 0;
 
         }
-      
-      }
-
-      enemyImmediateAction = false;
-
-      if (enemyHit > 0) {
-
-        if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
-
-          enemy.health = (enemy.health - enemyHit < 10 ? 0 : enemy.health - enemyHit);
-          enemy.regain = 0;
-
-          if (enemyStack.isEmpty()) {
-
-              enemyImmediateAction = (random(0, 2) == 0);
-              enemyImmediateRetreat = (random(0, 3) == 0);
-            
-          }
         
-        }
-        else {
+        if (enemyHit > 0) {
 
-          eagleMode = EAGLE_MODE_FLY_AWAY;
+          uint8_t index = (enemyHit > 3 ? 2 : enemyHit - 1);
+          enemy_BamX = player.xPos + player_BamXPos[player.stance - STANCE_KICK_MED_END] ; enemy_BamY = player.yPos + both_BamYPos[player.stance - STANCE_KICK_MED_END]; 
+
+          #ifdef USE_DIFFERENT_BAMS
+            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_masks[index], BLACK, false);
+            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_images[index], WHITE, false);
+          #endif
+
+          #ifndef USE_DIFFERENT_BAMS
+            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3_mask, BLACK, false);
+            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3, WHITE, false);
+          #endif
+
+          if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
+
+            enemy.health = (enemy.health - enemyHit < 10 ? 0 : enemy.health - enemyHit);
+            enemy.regain = 0;
+
+            if (enemyStack.isEmpty()) {
+
+                enemyImmediateAction = (random(0, 2) == 0);
+                enemyImmediateRetreat = (random(0, 3) == 0);
+              
+            }
+          
+          }
+          else {
+
+            eagleMode = EAGLE_MODE_FLY_AWAY;
+
+          }
 
         }
 
       }
       else {
 
-        enemy.regain++;
 
-        if (enemy.regain >= HEALTH_REGAIN_LIMIT) {
+        // Let the player and enemy regain some health if they ahven't been hit in a while ..
 
-          enemy.health = (enemy.health + HEALTH_REGAIN_POINTS < enemy.regainLimit ? enemy.health + HEALTH_REGAIN_POINTS : enemy.regainLimit);
-          enemy.regain = 0;
-                  
+        if (playerHit == 0) {
+
+          player.regain++;
+
+          if (player.regain >= HEALTH_REGAIN_LIMIT) {
+
+            player.health = (player.health + HEALTH_REGAIN_POINTS < player.regainLimit ? player.health + HEALTH_REGAIN_POINTS : player.regainLimit);
+            player.regain = 0;
+
+          }
+        
         }
-      
+
+        if (enemyHit == 0) {
+
+          enemy.regain++;
+
+          if (enemy.regain >= HEALTH_REGAIN_LIMIT) {
+
+            enemy.health = (enemy.health + HEALTH_REGAIN_POINTS < enemy.regainLimit ? enemy.health + HEALTH_REGAIN_POINTS : enemy.regainLimit);
+            enemy.regain = 0;
+                    
+          }
+        
+        }
+
       }
 
     }
 
-    
+
+
+
+
+
+
+        
+//  }
+
+
     // Has the player died ?
 
     if (!player.dead && player.health == 0) {
