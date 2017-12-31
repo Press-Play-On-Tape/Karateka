@@ -4,3 +4,4 @@
 *.json
 .vscode/arduino.json
 .vscode/arduino.json
+src/.DS_Store
