@@ -24,11 +24,14 @@ int8_t mainSceneDelta = 0;
 bool displayHealth = false;
 bool outdoors = true;
 
+uint8_t enemyHit = 0;
+uint8_t playerHit = 0;
+
 uint8_t eagleMode = EAGLE_MODE_NONE;
 bool eagleWingUp = false;
 
 uint8_t emperorMode = EMPEROR_MODE_INIT;
-uint8_t finalSceneMode = 0;
+uint8_t finalSceneMode = FINAL_SCENE_INACTIVE;
 
 #ifdef USE_DIFFERENT_BAMS
 const uint8_t *bam_images[] =               { bam1, bam2, bam3 };
@@ -62,7 +65,7 @@ void setup() {
 
   arduboy.boot();
   arduboy.safeMode(); 
-  arduboy.setFrameRate(20);
+  arduboy.setFrameRate(23);
 
   gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
 
@@ -118,9 +121,8 @@ void loop() {
         gameStateDetails.showCrevice = (pgm_read_byte(&gameSequence[ (gameStateDetails.sequence * GAME_STATE_SEQ_SIZE) + 4]) == 1); 
         gameStateDetails.hasDelay = (gameStateDetails.delayInterval > 0);
         gameStateDetails.activity = pgm_read_byte(&gameSequence[ (gameStateDetails.sequence * GAME_STATE_SEQ_SIZE) + 5]);
-        gameStateDetails.bonusHealth = (pgm_read_byte(&gameSequence[ (gameStateDetails.sequence * GAME_STATE_SEQ_SIZE) + 6]) == 1);
-        
         gameStateDetails.sequence++;
+
       }
       break;
       
@@ -175,7 +177,7 @@ void loop() {
       player.xPos = 10;
       player.xPosOverall = 0;
       
-      if (gameStateDetails.bonusHealth) {
+      if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
         if (player.health - 10 < HEALTH_STARTING_POINTS) { player.health = player.health + 10; }
         if (player.health - 10 < HEALTH_STARTING_POINTS) { player.health = player.health + 10; }
       }
@@ -305,33 +307,33 @@ void play_loop() {
   
   //  Update player and enemy positions and stances ..
 
-  if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
+  // if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
     
-    if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
+  //   if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
 
-    if (!playerStack.isEmpty()) {
+  //   if (!playerStack.isEmpty()) {
     
-      player.stance = playerStack.pop();
+  //     player.stance = playerStack.pop();
     
-    }
-    else {
+  //   }
+  //   else {
       
-      mainSceneDelta = 0;
+  //     mainSceneDelta = 0;
 
-    }
+  //   }
         
-    if (!enemyStack.isEmpty()) {
+  //   if (!enemyStack.isEmpty()) {
 
-      enemy.stance = enemyStack.pop();
+  //     enemy.stance = enemyStack.pop();
 
-    }
-    else {
+  //   }
+  //   else {
 
-      enemy.xPosDelta = 0;
+  //     enemy.xPosDelta = 0;
 
-    }
+  //   }
     
-  }
+  // }
 
   
   // Move scenery if needed ..
@@ -402,61 +404,63 @@ void play_loop() {
   }
 
 
- 
-
-
   // Has the player or enemy been hit ?
 
-  uint8_t enemyHit = 0;
-  uint8_t playerHit = 0;
+  uint8_t player_BamX = 0;
+  uint8_t player_BamY = 0;
 
+  uint8_t enemy_BamX = 0;
+  uint8_t enemy_BamY = 0;
 
-  // if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-    
-  //   if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
+  #ifdef USE_DIFFERENT_BAMS
+  const int8_t player_BamXPos[] = {  32,  31,  33,            33,  33,  34,  34,  29,  29 };
+  const int8_t enemy_BamXPos[] =  { -17, -17, -19,           -19, -19, -18, -18, -18, -18 };
+  const int8_t both_BamYPos[] =   { -30, -17, -42,           -37, -37, -41, -41, -27, -27 };
+  #endif
+  //                           Kick   M,   L,   H     Punch   MR,  ML,  HR,  HL,  LR,  LL     
+  #ifndef USE_DIFFERENT_BAMS
+  const int8_t player_BamXPos[] = {  27,  25,  30,            30,  30,  30,  30,  23,  23 };
+  const int8_t enemy_BamXPos[] =  { -20, -23, -19,           -22, -22, -18, -18, -24, -24 };
+  const int8_t both_BamYPos[] =   { -33, -21, -42,           -39, -39, -45, -45, -31, -31 };
+  #endif
 
-  //   if (!playerStack.isEmpty()) {
+  if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
     
-  //     player.stance = playerStack.pop();
+    enemyHit = 0;
+    playerHit = 0;
+
+    if (gameStateDetails.hasDelay && gameStateDetails.delayInterval > 0)      { gameStateDetails.delayInterval--; }
+
+    if (!playerStack.isEmpty()) {
     
-  //   }
-  //   else {
+      player.stance = playerStack.pop();
+    
+    }
+    else {
       
-  //     mainSceneDelta = 0;
+      mainSceneDelta = 0;
 
-  //   }
+    }
         
-  //   if (!enemyStack.isEmpty()) {
+    if (!enemyStack.isEmpty()) {
 
-  //     enemy.stance = enemyStack.pop();
+      enemy.stance = enemyStack.pop();
 
-  //   }
-  //   else {
+    }
+    else {
 
-  //     enemy.xPosDelta = 0;
+      enemy.xPosDelta = 0;
 
-  //   }
-
-
+    }
 
 
-  if (gameStateDetails.enemyType != ENEMY_TYPE_NONE) {
 
-    #ifdef USE_DIFFERENT_BAMS
-    const int8_t player_BamXPos[] = {  32,  31,  33,            33,  33,  34,  34,  29,  29 };
-    const int8_t enemy_BamXPos[] =  { -17, -17, -19,           -19, -19, -18, -18, -18, -18 };
-    const int8_t both_BamYPos[] =   { -30, -17, -42,           -37, -37, -41, -41, -27, -27 };
-    #endif
-    //                           Kick   M,   L,   H     Punch   MR,  ML,  HR,  HL,  LR,  LL     
-    #ifndef USE_DIFFERENT_BAMS
-    const int8_t player_BamXPos[] = {  27,  25,  30,            30,  30,  30,  30,  23,  23 };
-    const int8_t enemy_BamXPos[] =  { -20, -23, -19,           -22, -22, -18, -18, -24, -24 };
-    const int8_t both_BamYPos[] =   { -33, -21, -42,           -39, -39, -45, -45, -31, -31 };
-    #endif
+
+    if (gameStateDetails.enemyType != ENEMY_TYPE_NONE) {
+
+      enemyImmediateAction = false;
+
     
-    enemyImmediateAction = false;
-
-    {
 
       if (player.stance >= STANCE_KICK_MED_END && player.stance <= STANCE_PUNCH_LOW_LH_END) {
 
@@ -469,174 +473,168 @@ void play_loop() {
         playerHit = inStrikingRange(getActionFromStance(enemy.stance), enemy.xPos, ENEMY_TYPE_PERSON, player.stance, player.xPos);
 
       }
-
       if (playerHit > 0 || enemyHit > 0) {
 
-        uint8_t player_BamX = 0;
-        uint8_t player_BamY = 0;
-
-        uint8_t enemy_BamX = 0;
-        uint8_t enemy_BamY = 0;
 
         #ifdef SOUNDS
+        if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
           sound.tones(ouch);
+        }
         #endif 
 
-        if (playerHit > 0) {
+      }
+    }
 
-          uint8_t index = (playerHit > 3 ? 2 : playerHit - 1);
+  }
 
-          player_BamX = (enemy.xPos + enemy_BamXPos[enemy.stance - STANCE_KICK_MED_END]); 
-          if (player_BamX > 128) { player_BamX = 0; }
-          player_BamY = enemy.yPos + both_BamYPos[enemy.stance - STANCE_KICK_MED_END]; 
 
-          #ifndef DEBUG_HIDE_BAM
+  if (playerHit > 0 || enemyHit > 0) {
 
-            #ifdef USE_DIFFERENT_BAMS
-            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_masks[index], BLACK, false);
-            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_images[index], WHITE, false);
-            #endif
+    if (playerHit > 0) {
 
-            #ifndef USE_DIFFERENT_BAMS
-            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3_mask, BLACK, false);
-            arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3, WHITE, false);
-            #endif
+      uint8_t index = (playerHit > 3 ? 2 : playerHit - 1);
 
-          #endif
+      player_BamX = (enemy.xPos + enemy_BamXPos[enemy.stance - STANCE_KICK_MED_END]); 
+      if (player_BamX > 128) { player_BamX = 0; }
+      player_BamY = enemy.yPos + both_BamYPos[enemy.stance - STANCE_KICK_MED_END]; 
 
-          player.health = (player.health - playerHit < 10 ? 0 : player.health - playerHit);
-          player.regain = 0;
+      #ifndef DEBUG_HIDE_BAM
 
-        }
-        
-        if (enemyHit > 0) {
+        #ifdef USE_DIFFERENT_BAMS
+        arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_masks[index], BLACK, false);
+        arduboy.drawCompressedMirror(player_BamX, player_BamY, bam_images[index], WHITE, false);
+        #endif
 
-          uint8_t index = (enemyHit > 3 ? 2 : enemyHit - 1);
-          enemy_BamX = player.xPos + player_BamXPos[player.stance - STANCE_KICK_MED_END] ; enemy_BamY = player.yPos + both_BamYPos[player.stance - STANCE_KICK_MED_END]; 
+        #ifndef USE_DIFFERENT_BAMS
+        arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3_mask, BLACK, false);
+        arduboy.drawCompressedMirror(player_BamX, player_BamY, bam3, WHITE, false);
+        #endif
 
-          #ifdef USE_DIFFERENT_BAMS
-            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_masks[index], BLACK, false);
-            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_images[index], WHITE, false);
-          #endif
+      #endif
 
-          #ifndef USE_DIFFERENT_BAMS
-            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3_mask, BLACK, false);
-            arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3, WHITE, false);
-          #endif
+      player.health = (player.health - playerHit < 10 ? 0 : player.health - playerHit);
+      player.regain = 0;
 
-          if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
+    }
+    
+    if (enemyHit > 0) {
 
-            enemy.health = (enemy.health - enemyHit < 10 ? 0 : enemy.health - enemyHit);
-            enemy.regain = 0;
+      uint8_t index = (enemyHit > 3 ? 2 : enemyHit - 1);
+      enemy_BamX = player.xPos + player_BamXPos[player.stance - STANCE_KICK_MED_END] ; enemy_BamY = player.yPos + both_BamYPos[player.stance - STANCE_KICK_MED_END]; 
 
-            if (enemyStack.isEmpty()) {
+      #ifdef USE_DIFFERENT_BAMS
+        arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_masks[index], BLACK, false);
+        arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam_images[index], WHITE, false);
+      #endif
 
-                enemyImmediateAction = (random(0, 2) == 0);
-                enemyImmediateRetreat = (random(0, 3) == 0);
-              
-            }
+      #ifndef USE_DIFFERENT_BAMS
+        arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3_mask, BLACK, false);
+        arduboy.drawCompressedMirror(enemy_BamX, enemy_BamY, bam3, WHITE, false);
+      #endif
+
+      if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON) {
+
+        enemy.health = (enemy.health - enemyHit < 10 ? 0 : enemy.health - enemyHit);
+        enemy.regain = 0;
+
+        if (enemyStack.isEmpty()) {
+
+            enemyImmediateAction = (random(0, 2) == 0);
+            enemyImmediateRetreat = (random(0, 3) == 0);
           
-          }
-          else {
-
-            eagleMode = EAGLE_MODE_FLY_AWAY;
-
-          }
-
         }
-
+      
       }
       else {
 
-
-        // Let the player and enemy regain some health if they ahven't been hit in a while ..
-
-        if (playerHit == 0) {
-
-          player.regain++;
-
-          if (player.regain >= HEALTH_REGAIN_LIMIT) {
-
-            player.health = (player.health + HEALTH_REGAIN_POINTS < player.regainLimit ? player.health + HEALTH_REGAIN_POINTS : player.regainLimit);
-            player.regain = 0;
-
-          }
-        
-        }
-
-        if (enemyHit == 0) {
-
-          enemy.regain++;
-
-          if (enemy.regain >= HEALTH_REGAIN_LIMIT) {
-
-            enemy.health = (enemy.health + HEALTH_REGAIN_POINTS < enemy.regainLimit ? enemy.health + HEALTH_REGAIN_POINTS : enemy.regainLimit);
-            enemy.regain = 0;
-                    
-          }
-        
-        }
+        eagleMode = EAGLE_MODE_FLY_AWAY;
 
       }
 
     }
 
+  }
+  else {
 
 
+    // Let the player and enemy regain some health if they haven't been hit in a while ..
 
+    if (playerHit == 0) {
 
+      player.regain++;
 
+      if (player.regain >= HEALTH_REGAIN_LIMIT) {
 
-        
-//  }
+        player.health = (player.health + HEALTH_REGAIN_POINTS < player.regainLimit ? player.health + HEALTH_REGAIN_POINTS : player.regainLimit);
+        player.regain = 0;
 
-
-    // Has the player died ?
-
-    if (!player.dead && player.health == 0) {
-
-      playerStack.clear();
-      playerStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
-      playerStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
-      player.dead = true;
-
-      if (eagleMode == EAGLE_MODE_NONE) {
-
-        enemyStack.insert(STANCE_DEFAULT_LEAN_BACK);
-        for (int i = 0; i < 20; i++) {
-          enemyStack.insert(STANCE_STANDING_UPRIGHT);
-        }
-
-        enemy.xPosDelta = 0;
-        
       }
-
-      mainSceneDelta = 0;
-      
+    
     }
 
+    if (enemyHit == 0) {
 
-    // Has the enemy died ?
+      enemy.regain++;
 
-    if (!enemy.dead && enemy.health == 0) {
-      
-      enemyStack.clear();
-      enemyStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
-      enemyStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
-      enemy.dead = true;
+      if (enemy.regain >= HEALTH_REGAIN_LIMIT) {
 
-      playerStack.insert(STANCE_DEFAULT_LEAN_BACK);
-      for (int i = 0; i < 15; i++) {
-        playerStack.insert(STANCE_STANDING_UPRIGHT);
+        enemy.health = (enemy.health + HEALTH_REGAIN_POINTS < enemy.regainLimit ? enemy.health + HEALTH_REGAIN_POINTS : enemy.regainLimit);
+        enemy.regain = 0;
+                
+      }
+    
+    }
+
+  }
+
+
+
+
+  // Has the player died ?
+
+  if (!player.dead && player.health == 0) {
+
+    playerStack.clear();
+    playerStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
+    playerStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
+    player.dead = true;
+
+    if (eagleMode == EAGLE_MODE_NONE) {
+
+      enemyStack.insert(STANCE_DEFAULT_LEAN_BACK);
+      for (int i = 0; i < 20; i++) {
+        enemyStack.insert(STANCE_STANDING_UPRIGHT);
       }
 
-      mainSceneDelta = 0;
       enemy.xPosDelta = 0;
       
     }
 
+    mainSceneDelta = 0;
+    
   }
-  
+
+
+  // Has the enemy died ?
+
+  if (!enemy.dead && enemy.health == 0) {
+    
+    enemyStack.clear();
+    enemyStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
+    enemyStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
+    enemy.dead = true;
+
+    playerStack.insert(STANCE_DEFAULT_LEAN_BACK);
+    for (int i = 0; i < 15; i++) {
+      playerStack.insert(STANCE_STANDING_UPRIGHT);
+    }
+
+    mainSceneDelta = 0;
+    enemy.xPosDelta = 0;
+    
+  }
+
+
   if (gameStateDetails.enemyType != ENEMY_TYPE_NONE && playerStack.isEmpty() && enemyStack.isEmpty() && player.dead)    { gameStateDetails.setCurrState(GAME_STATE_THE_END); }
   if (gameStateDetails.enemyType == ENEMY_TYPE_PERSON && playerStack.isEmpty() && enemyStack.isEmpty() && enemy.dead)   { gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE); }
   
