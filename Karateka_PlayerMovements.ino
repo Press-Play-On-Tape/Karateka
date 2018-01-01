@@ -83,6 +83,23 @@ void playerMovements() {
 
           break;
 
+        case STANCE_PUNCH_READY:                                  // Really shouldn't happen but if B is pressed before A and both held ..
+            
+            if (currPressed & RIGHT_BUTTON_MASK)  {               // Medium punch ..
+              playerStack.push(STANCE_PUNCH_READY, (player.rightPunch ? STANCE_PUNCH_MED_RH_END : STANCE_PUNCH_MED_LH_END));
+            }
+
+            else if (currPressed & UP_BUTTON_MASK)  {             // High punch ..
+              playerStack.push(STANCE_PUNCH_READY, (player.rightPunch ? STANCE_PUNCH_HIGH_RH_END : STANCE_PUNCH_HIGH_LH_END));
+            }
+
+            else if (currPressed & DOWN_BUTTON_MASK)  {           // Low punch ..
+              playerStack.push(STANCE_PUNCH_READY, (player.rightPunch ? STANCE_PUNCH_LOW_RH_END : STANCE_PUNCH_LOW_LH_END));
+            }
+
+            player.rightPunch = !player.rightPunch;
+            break;
+
       }
               
     }
