@@ -5,22 +5,30 @@
 #include "src/images/images.h"
 #include "Enums.h"
 
-#ifdef SOUNDS
+#ifdef SOUNDS_ARDUBOYTONES
 #include <ArduboyTones.h>
-#include "src/sounds/Sounds.h"
+#include "src/sounds/Sounds_ArduboyTones.h"
+#endif
+
+#ifdef SOUNDS_ATMLIB
+#include <ATMlib.h>
+#include "src/sounds/Sounds_ATMLib.h"
 #endif
 
 Arduboy2Ext arduboy;
 
-#ifdef SOUNDS
+#ifdef SOUNDS_ARDUBOYTONES
 ArduboyTones sound(arduboy.audio.on);
+#endif
+
+#ifdef SOUNDS_ATMLIB
+ATMsynth ATM;
 #endif
 
 StackArray <uint8_t> playerStack;
 StackArray <uint8_t> enemyStack;
 
 int8_t mainSceneX = 0;
-//int8_t mainSceneDelta = 0;
 bool displayHealth = false;
 bool outdoors = true;
 
@@ -66,6 +74,10 @@ void setup() {
   arduboy.boot();
   arduboy.safeMode(); 
   arduboy.setFrameRate(23);
+
+  #ifdef SOUNDS_ATMLIB
+  arduboy.audio.on;
+  #endif
 
   gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
 
@@ -371,9 +383,15 @@ void play_loop() {
       if (playerHit > 0 || enemyHit > 0) {
 
 
-        #ifdef SOUNDS
+        #ifdef SOUNDS_ARDUBOYTONES
         if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
           sound.tones(ouch);
+        }
+        #endif 
+
+        #ifdef SOUNDS_ATMLIB
+        if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
+          ATM.play(ouch);
         }
         #endif 
 
