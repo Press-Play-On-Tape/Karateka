@@ -1,5 +1,4 @@
 #include "src/utils/Arduboy2Ext.h"
-#include "src/utils/StackArray.h"
 #include "src/utils/PlayerStances.h"
 #include "src/utils/EnemyStances.h"
 #include "src/images/images.h"
@@ -84,7 +83,8 @@ void showScene() {
         if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
           
           if (!enemyStack.isEmpty()) {
-            enemy.stance = enemyStack.pop();
+            enemy.stance = enemyStack.peek();
+            enemyStack.drop();
           }
           else {
             player.xPosDelta = 0;
@@ -219,12 +219,14 @@ void finalScene() {
     if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
       
       if (!enemyStack.isEmpty()) {
-        enemy.stance = enemyStack.pop();
+        enemy.stance = enemyStack.peek();
+        enemyStack.drop();
         enemy.xPos = enemy.xPos + enemy.xPosDelta;
       }
            
       if (!playerStack.isEmpty()) {
-        player.stance = playerStack.pop();
+        player.stance = playerStack.peek();
+        playerStack.drop();
         player.xPos = player.xPos + player.xPosDelta;
         }
 

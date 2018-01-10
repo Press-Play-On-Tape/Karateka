@@ -1,5 +1,4 @@
 #include "src/utils/Arduboy2Ext.h"
-#include "src/utils/StackArray.h"
 #include "src/utils/PlayerStances.h"
 #include "src/utils/EnemyStances.h"
 #include "src/images/images.h"
@@ -100,7 +99,8 @@ void emperor_loop() {
     
     if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
       
-      enemy.stance = enemyStack.pop();
+      enemy.stance = enemyStack.peek();
+      enemyStack.drop();
       enemy.xPos = enemy.xPos + enemy.xPosDelta;
 
       if (enemyStack.isEmpty()) {

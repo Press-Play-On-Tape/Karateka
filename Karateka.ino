@@ -1,5 +1,5 @@
 #include "src/utils/Arduboy2Ext.h"
-#include "src/utils/StackArray.h"
+#include "src/utils/Stack.h"
 #include "src/utils/PlayerStances.h"
 #include "src/utils/EnemyStances.h"
 #include "src/images/images.h"
@@ -25,8 +25,8 @@ ArduboyTones sound(arduboy.audio.on);
 ATMsynth ATM;
 #endif
 
-StackArray <uint8_t> playerStack;
-StackArray <uint8_t> enemyStack;
+Stack <uint8_t, 30> playerStack;
+Stack <uint8_t, 30> enemyStack;
 
 int8_t mainSceneX = 0;
 bool displayHealth = false;
@@ -349,14 +349,16 @@ void play_loop() {
     // Update the player and enemy stances from the stack ..
 
     if (!playerStack.isEmpty()) {
-      player.stance = playerStack.pop();
+      player.stance = playerStack.peek();
+      playerStack.drop();
     }
     else {
       player.xPosDelta = 0;
     }
         
     if (!enemyStack.isEmpty()) {
-      enemy.stance = enemyStack.pop();
+      enemy.stance = enemyStack.peek();
+      enemyStack.drop();
     }
     else {
       enemy.xPosDelta = 0;
@@ -581,7 +583,7 @@ void play_loop() {
     playerStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
     player.dead = true;
 
-    if (eagleMode == EAGLE_MODE_NONE) {
+    if (eagleMode == EAGLE_MODE_NONE || eagleMode == EAGLE_MODE_FLY_INIT) {
 
       enemyStack.insert(STANCE_DEFAULT_LEAN_BACK);
       for (int i = 0; i < 20; i++) {

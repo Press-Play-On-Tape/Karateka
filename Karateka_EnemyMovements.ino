@@ -1,5 +1,4 @@
 #include "src/utils/Arduboy2Ext.h"
-#include "src/utils/StackArray.h"
 #include "src/utils/PlayerStances.h"
 #include "src/utils/EnemyStances.h"
 #include "src/images/images.h"
