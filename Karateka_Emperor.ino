@@ -99,8 +99,7 @@ void emperor_loop() {
     
     if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
       
-      enemy.stance = enemyStack.peek();
-      enemyStack.drop();
+      enemy.stance = enemyStack.pop();
       enemy.xPos = enemy.xPos + enemy.xPosDelta;
 
       if (enemyStack.isEmpty()) {

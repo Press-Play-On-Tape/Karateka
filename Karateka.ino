@@ -349,16 +349,14 @@ void play_loop() {
     // Update the player and enemy stances from the stack ..
 
     if (!playerStack.isEmpty()) {
-      player.stance = playerStack.peek();
-      playerStack.drop();
+      player.stance = playerStack.pop();
     }
     else {
       player.xPosDelta = 0;
     }
         
     if (!enemyStack.isEmpty()) {
-      enemy.stance = enemyStack.peek();
-      enemyStack.drop();
+      enemy.stance = enemyStack.pop();
     }
     else {
       enemy.xPosDelta = 0;
