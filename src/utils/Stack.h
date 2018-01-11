@@ -102,24 +102,6 @@ const typename Stack< Type, Capacity >::ItemType & Stack< Type, Capacity >::peek
 	return this->items[this->next - 1];
 }
 
-// template< typename Type, uint8_t Capacity >
-// typename Stack< Type, Capacity >::ItemType & Stack< Type, Capacity >::pop(void) // O(1)
-// {
-//    	--this->next;
-// 	ItemType ret = this->items[this->next];
-// 	this->items[this->next].~ItemType();
-//     return ret;
-// }
-
-// template< typename Type, uint8_t Capacity >
-// const typename Stack< Type, Capacity >::ItemType & Stack< Type, Capacity >::pop(void) const // O(1)
-// {
-//    	--this->next;
-//     ItemType ret = this->items[this->next];
-// 	this->items[this->next].~ItemType();
-//     return ret;
-// }
-
 template< typename Type, uint8_t Capacity >
 bool Stack< Type, Capacity >::insert(const typename Stack< Type, Capacity >::ItemType & item) // O(1)
 {
