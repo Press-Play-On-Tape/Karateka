@@ -74,7 +74,8 @@ void setup() {
   arduboy.boot();
   arduboy.safeMode(); 
   arduboy.setFrameRate(23);
-
+  arduboy.initRandomSeed();
+  
   #ifdef SOUNDS_ATMLIB
   arduboy.audio.on;
   #endif
