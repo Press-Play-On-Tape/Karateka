@@ -8,16 +8,14 @@
 #ifdef SOUNDS_ARDUBOYTONES
 #include <ArduboyTones.h>
 #include "src/sounds/Sounds_ArduboyTones.h"
-#endif
-
-#ifdef SOUNDS_ATMLIB
-#include "src/Sound/Sound.h"
+ArduboyTones sound(arduboy.audio.on);
 #endif
 
 Arduboy2Ext arduboy;
 
-#ifdef SOUNDS_ARDUBOYTONES
-ArduboyTones sound(arduboy.audio.on);
+
+#ifdef SOUNDS_ATMLIB
+#include "Sound.h"
 #endif
 
 
