@@ -11,8 +11,7 @@
 #endif
 
 #ifdef SOUNDS_ATMLIB
-#include <ATMlib.h>
-#include "src/sounds/Sounds_ATMLib.h"
+#include "src/Sound/Sound.h"
 #endif
 
 Arduboy2Ext arduboy;
@@ -21,9 +20,6 @@ Arduboy2Ext arduboy;
 ArduboyTones sound(arduboy.audio.on);
 #endif
 
-#ifdef SOUNDS_ATMLIB
-ATMsynth ATM;
-#endif
 
 Stack <uint8_t, 30> playerStack;
 Stack <uint8_t, 30> enemyStack;
@@ -77,7 +73,7 @@ void setup() {
   arduboy.initRandomSeed();
   
   #ifdef SOUNDS_ATMLIB
-  arduboy.audio.on;
+  Sound::init();
   #endif
 
   gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
@@ -203,6 +199,9 @@ void loop() {
       break;
 
     case GAME_STATE_PLAY:
+#ifdef SOUNDS_ATMLIB
+      // Sound::play_score(0);
+#endif
       arduboy.clear();
       play_loop();
       break;
@@ -392,7 +391,7 @@ void play_loop() {
 
         #ifdef SOUNDS_ATMLIB
         if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-          ATM.play(ouch);
+          Sound::play_sound(0);
         }
         #endif 
 
