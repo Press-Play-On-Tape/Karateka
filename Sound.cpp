@@ -8,7 +8,8 @@ static Arduboy2Audio audio;
 
 // Todo change to <ATMLib.h> once we publish
 #include "src/sounds/SFX.h"
-#include "src/sounds/evade2_00_intro_alt_smaller.h"
+#include "src/sounds/song_01_enter_arena.h"
+#include "src/sounds/song_02_fight.h"
 
 uint8_t current_song = -1;
 
@@ -25,6 +26,7 @@ void Sound::init() {
 void Sound::play_sound(uint8_t id) {
   static const PROGMEM uint8_t *const sounds[] = {
     (uint8_t *)&SFX_ouch,
+    (uint8_t *)&SFX_step
   };
 
   atm_synth_stop_sfx_track(&sfx_state);
@@ -40,9 +42,8 @@ void Sound::stfu() {
 
 void Sound::play_score(uint8_t id) {
   static const PROGMEM uint8_t *const songs[] = {
-    // (uint8_t *)&evade2_00_intro,               // 0 INTRO_SONG
-    (uint8_t *)&evade2_00_intro_alt_smaller,   // 0 INTRO_SONG
-
+    (uint8_t *)&song_01_enter_arena, 
+    (uint8_t *)&song_02_fight,   
   };
 
   if (current_song == id) {

@@ -3,6 +3,7 @@
 #include "src/utils/EnemyStances.h"
 #include "src/images/images.h"
 #include "Enums.h"
+#include "Sound.h"
 
 void drawPrincessBackground_1() {
 
@@ -58,15 +59,18 @@ void showScene() {
 #endif      
 
       case GAME_STATE_CASTLE_SCENE:
+        Sound::stfu();
+
         arduboy.drawCompressedMirror(0, 0, castle, WHITE, false);
         break;
         
       case GAME_STATE_THE_END:
+        Sound::stfu();
         arduboy.drawCompressedMirror(34, 26, theend, WHITE, false);
         break;
         
       case GAME_STATE_PRINCESS:
-
+        Sound::stfu();
         drawPrincessBackground_1();
         drawPrincessBackground_2();
         arduboy.drawCompressedMirror(93, 19, princess_sitting_mask, BLACK, false);
@@ -75,7 +79,6 @@ void showScene() {
         break;
 
       case GAME_STATE_ENEMY_APPROACH:
-
         draw_background();
     
         //  Update player and enemy positions and stances ..

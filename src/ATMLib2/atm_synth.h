@@ -20,9 +20,9 @@
 #define ATM_HAS_FX_GLISSANDO (0)
 #define ATM_HAS_FX_LOOP (0)
 #else
-#define ATM_HAS_FX_NOISE_RETRIG (1)
-#define ATM_HAS_FX_NOTE_RETRIG (1)
-#define ATM_HAS_FX_SLIDE (1)
+#define ATM_HAS_FX_NOISE_RETRIG (0)
+#define ATM_HAS_FX_NOTE_RETRIG (0)
+#define ATM_HAS_FX_SLIDE (0)
 #define ATM_HAS_FX_LFO (0)
 #define ATM_HAS_FX_GLISSANDO (0)
 #define ATM_HAS_FX_LOOP (1)

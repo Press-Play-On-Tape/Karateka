@@ -58,7 +58,7 @@ bool enemyImmediateAction = false;
 bool enemyImmediateRetreat = false;
 
 
-
+bool hasPlayedIntroSong = false;
 // ---------------------------------------------------------------------------------------------------------------
 //  Setup
 // ---------------------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ void setup() {
 
   arduboy.boot();
   arduboy.safeMode(); 
-  arduboy.setFrameRate(23);
+  arduboy.setFrameRate(60);
   arduboy.initRandomSeed();
   
   #ifdef SOUNDS_ATMLIB
@@ -91,7 +91,8 @@ void loop() {
   switch (gameStateDetails.getCurrState()) {
 
     case GAME_STATE_TITLE_SCENE:
-
+      hasPlayedIntroSong = false;
+      Sound::stfu();
       player = { STANCE_DEFAULT, 10, 0, 0, 55, 0, HEALTH_STARTING_POINTS, 0, HEALTH_STARTING_POINTS, 0, true, true, false };
       enemy = { STANCE_DEFAULT, 153, 0, 0, 55, 0, HEALTH_STARTING_POINTS, 0, HEALTH_STARTING_POINTS, 0, true, true, false };
       arduboy.clear();
@@ -197,9 +198,6 @@ void loop() {
       break;
 
     case GAME_STATE_PLAY:
-#ifdef SOUNDS_ATMLIB
-      // Sound::play_score(0);
-#endif
       arduboy.clear();
       play_loop();
       break;
@@ -297,9 +295,10 @@ void play_loop() {
 
   }
   else {
-
-    playerMovements();
-
+    // don't allow movements until the intro song has played
+    if (hasPlayedIntroSong) {
+      playerMovements();
+    }
   }
 
   switch (gameStateDetails.enemyType) {
@@ -351,6 +350,17 @@ void play_loop() {
     }
     else {
       player.xPosDelta = 0;
+#ifdef SOUNDS_ATMLIB
+      if (! hasPlayedIntroSong) {
+        Sound::play_score(0);
+        delay(5000);
+        hasPlayedIntroSong = true;  
+      }
+#endif
+    }
+
+    if (hasPlayedIntroSong) {
+      Sound::play_score(1);
     }
         
     if (!enemyStack.isEmpty()) {
@@ -359,6 +369,7 @@ void play_loop() {
     else {
       enemy.xPosDelta = 0;
     }
+
 
 
     // If we are fighting, check to see if a strike has been made ..
@@ -389,7 +400,7 @@ void play_loop() {
 
         #ifdef SOUNDS_ATMLIB
         if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-          Sound::play_sound(0);
+          Sound::play_sound(SFX_OUCH);
         }
         #endif 
 
@@ -573,7 +584,6 @@ void play_loop() {
   // Has the player died ?
 
   if (!player.dead && player.health == 0) {
-
     playerStack.clear();
     playerStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
     playerStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
@@ -598,7 +608,6 @@ void play_loop() {
   // Has the enemy died ?
 
   if (!enemy.dead && enemy.health == 0) {
-    
     enemyStack.clear();
     enemyStack.push(STANCE_DEATH_6, STANCE_DEATH_5, STANCE_DEATH_4);
     enemyStack.push(STANCE_DEATH_3, STANCE_DEATH_2, STANCE_DEATH_1);
