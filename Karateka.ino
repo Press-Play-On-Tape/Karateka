@@ -5,25 +5,19 @@
 #include "src/images/images.h"
 #include "Enums.h"
 
-#ifdef SOUNDS_ARDUBOYTONES
-#include <ArduboyTones.h>
-#include "src/sounds/Sounds_ArduboyTones.h"
-#endif
-
-#ifdef SOUNDS_ATMLIB
-#include <ATMlib.h>
-#include "src/sounds/Sounds_ATMLib.h"
-#endif
-
 Arduboy2Ext arduboy;
 
-#ifdef SOUNDS_ARDUBOYTONES
-ArduboyTones sound(arduboy.audio.on);
-#endif
+#include <ATMlib.h>
+#include "src/sounds/Sounds_ATMLib.h"
 
-#ifdef SOUNDS_ATMLIB
-ATMsynth ATM;
-#endif
+#include "Sound.h"
+#include "src/sounds/SFX.h"
+#include "src/sounds/song_01_enter_arena.h"
+#include "src/sounds/song_02_fight.h"
+#include "src/sounds/next_enemy_p1.h"
+#include "src/sounds/next_enemy_p2.h"
+#include "src/sounds/princess_scene.h"
+#include "src/sounds/you_win.h"
 
 Stack <uint8_t, 30> playerStack;
 Stack <uint8_t, 30> enemyStack;
@@ -77,7 +71,7 @@ void setup() {
   arduboy.initRandomSeed();
   
   #ifdef SOUNDS_ATMLIB
-  arduboy.audio.on;
+  Sound::init();
   #endif
 
   gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
@@ -203,6 +197,9 @@ void loop() {
       break;
 
     case GAME_STATE_PLAY:
+#ifdef SOUNDS_ATMLIB
+      // Sound::play_score(0);
+#endif
       arduboy.clear();
       play_loop();
       break;
@@ -383,16 +380,9 @@ void play_loop() {
       }
       if (playerHit > 0 || enemyHit > 0) {
 
-
-        #ifdef SOUNDS_ARDUBOYTONES
-        if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-          sound.tones(ouch);
-        }
-        #endif 
-
         #ifdef SOUNDS_ATMLIB
         if (arduboy.everyXFrames(ANIMATION_NUMBER_OF_FRAMES)) {
-          ATM.play(ouch);
+          Sound::play_sound(0);
         }
         #endif 
 
