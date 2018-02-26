@@ -7,9 +7,6 @@
 
 Arduboy2Ext arduboy;
 
-#include <ATMlib.h>
-#include "src/sounds/Sounds_ATMLib.h"
-
 #include "Sound.h"
 #include "src/sounds/SFX.h"
 #include "src/sounds/song_01_enter_arena.h"
