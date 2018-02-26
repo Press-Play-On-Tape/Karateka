@@ -8,13 +8,6 @@
 Arduboy2Ext arduboy;
 
 #include "Sound.h"
-#include "src/sounds/SFX.h"
-#include "src/sounds/song_01_enter_arena.h"
-#include "src/sounds/song_02_fight.h"
-#include "src/sounds/next_enemy_p1.h"
-#include "src/sounds/next_enemy_p2.h"
-#include "src/sounds/princess_scene.h"
-#include "src/sounds/you_win.h"
 
 Stack <uint8_t, 30> playerStack;
 Stack <uint8_t, 30> enemyStack;
