@@ -32,6 +32,8 @@
 #define GAME_STATE_PRINCESS_INIT                  16
 #define GAME_STATE_PRINCESS                       17
 #define GAME_STATE_FINAL_SCENE                    18
+#define GAME_SPLASH_SCREEN_INIT                   19
+#define GAME_SPLASH_SCREEN                        20
 
 #define GAME_STATE_SEQ_SIZE                       6
 

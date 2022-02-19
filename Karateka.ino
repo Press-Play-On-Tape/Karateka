@@ -80,7 +80,7 @@ void setup() {
   arduboy.audio.on;
   #endif
 
-  gameStateDetails.setCurrState(GAME_STATE_FOLLOW_SEQUENCE);
+  gameStateDetails.setCurrState(GAME_SPLASH_SCREEN_INIT);
 
 }
 
@@ -95,6 +95,19 @@ void loop() {
   arduboy.pollButtons();
 
   switch (gameStateDetails.getCurrState()) {
+
+    case GAME_SPLASH_SCREEN_INIT:
+
+      splashScreen_Init();
+      splashScreen();
+      arduboy.display(false);
+      break;
+
+    case GAME_SPLASH_SCREEN:
+
+      splashScreen();
+      arduboy.display(false);
+      break;
 
     case GAME_STATE_TITLE_SCENE:
 
