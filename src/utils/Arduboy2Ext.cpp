@@ -8,7 +8,7 @@ uint8_t Arduboy2Ext::curButtonState() const {
 
 }
 
-struct BitStreamReader {
+struct Arduboy2Base::BitStreamReader {
 
   const uint8_t *source;
   uint16_t sourceIndex;
